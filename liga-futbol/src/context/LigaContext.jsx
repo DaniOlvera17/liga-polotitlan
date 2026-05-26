@@ -3,7 +3,8 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 const LigaContext = createContext(null)
 
 // URL base del backend Flask — cámbiala si usas otro puerto
-const API = 'http://localhost:8000'
+//const API = 'http://localhost:8000'
+const API = 'http://104.197.141.245:8000'
 
 // Helper: fetch con JSON
 const api = async (path, method = 'GET', body = null) => {
