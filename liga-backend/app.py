@@ -279,5 +279,107 @@ def eliminar_partido(id):
     conn.close()
     return jsonify({'mensaje': 'Partido eliminado'})
 
+
+@app.route('/usuarios', methods=['GET'])
+def get_usuarios():
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT id_usuario AS id, nombre, email, rol,
+                   id_equipo AS equipoId, activo
+            FROM usuario
+        """)
+        rows = cur.fetchall()
+    conn.close()
+    return jsonify(rows)
+
+@app.route('/usuarios', methods=['POST'])
+def crear_usuario():
+    d = request.get_json()
+    conn = get_connection()
+    with conn.cursor() as cur:
+        # Verificar que el email no exista
+        cur.execute("SELECT id_usuario FROM usuario WHERE email=%s", (d['email'],))
+        if cur.fetchone():
+            conn.close()
+            return jsonify({'error': 'El email ya está registrado'}), 400
+        cur.execute(
+            """INSERT INTO usuario (nombre, email, password, rol, id_equipo, activo)
+               VALUES (%s, %s, %s, %s, %s, 1)""",
+            (d['nombre'], d['email'], d['password'], d['rol'], d.get('equipoId'))
+        )
+        conn.commit()
+        new_id = cur.lastrowid
+    conn.close()
+    return jsonify({
+        'id': new_id, 'nombre': d['nombre'], 'email': d['email'],
+        'rol': d['rol'], 'equipoId': d.get('equipoId'), 'activo': 1
+    }), 201
+
+@app.route('/usuarios/<int:id>', methods=['PUT'])
+def actualizar_usuario(id):
+    d = request.get_json()
+    conn = get_connection()
+    with conn.cursor() as cur:
+        # Si mandan password la actualizamos, si no la dejamos igual
+        if d.get('password'):
+            cur.execute(
+                """UPDATE usuario SET nombre=%s, email=%s, password=%s,
+                   rol=%s, id_equipo=%s WHERE id_usuario=%s""",
+                (d['nombre'], d['email'], d['password'], d['rol'], d.get('equipoId'), id)
+            )
+        else:
+            cur.execute(
+                """UPDATE usuario SET nombre=%s, email=%s,
+                   rol=%s, id_equipo=%s WHERE id_usuario=%s""",
+                (d['nombre'], d['email'], d['rol'], d.get('equipoId'), id)
+            )
+        conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Usuario actualizado'})
+
+@app.route('/usuarios/<int:id>/toggle', methods=['PUT'])
+def toggle_usuario(id):
+    """Activa o desactiva un usuario (baja lógica)"""
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute("SELECT activo FROM usuario WHERE id_usuario=%s", (id,))
+        row = cur.fetchone()
+        if not row:
+            conn.close()
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+        nuevo_estado = 0 if row['activo'] else 1
+        cur.execute("UPDATE usuario SET activo=%s WHERE id_usuario=%s", (nuevo_estado, id))
+        conn.commit()
+    conn.close()
+    return jsonify({'activo': nuevo_estado})
+
+@app.route('/usuarios/<int:id>', methods=['DELETE'])
+def eliminar_usuario(id):
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM usuario WHERE id_usuario=%s", (id,))
+        conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Usuario eliminado'})
+
+@app.route('/login', methods=['POST'])
+def login():
+    d = request.get_json()
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT id_usuario AS id, nombre, email, rol, id_equipo AS equipoId, activo
+            FROM usuario
+            WHERE email=%s AND password=%s
+        """, (d['email'], d['password']))
+        user = cur.fetchone()
+    conn.close()
+    if not user:
+        return jsonify({'error': 'Correo o contraseña incorrectos'}), 401
+    if not user['activo']:
+        return jsonify({'error': 'Usuario desactivado'}), 403
+    return jsonify(user)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=False, port=8000)

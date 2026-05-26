@@ -11,6 +11,7 @@ import Posiciones   from '../pages/Posiciones'
 import Goleadores   from '../pages/Goleadores'
 import Admin        from '../pages/Admin'
 import MisPartidos  from '../pages/MisPartidos'
+import Control      from '../pages/Control'
 
 export default function AppRouter() {
   return (
@@ -40,6 +41,13 @@ export default function AppRouter() {
         <Route path="admin" element={
           <PrivateRoute soloAdmin>
             <Admin />
+          </PrivateRoute>
+        } />
+
+        {/* Solo admin: control de usuarios */}
+        <Route path="control" element={
+          <PrivateRoute soloAdmin>
+            <Control />
           </PrivateRoute>
         } />
       </Route>

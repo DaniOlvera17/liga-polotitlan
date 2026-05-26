@@ -10,6 +10,7 @@ import {
   Target,
   ClipboardList,
   Settings,
+  UserCog,
 } from 'lucide-react'
 
 const NAV = [
@@ -117,6 +118,8 @@ export default function Sidebar({ open }) {
                 Administración
               </div>
             )}
+
+            {/* Admin */}
             <NavLink
               to="/admin"
               style={({ isActive }) => ({
@@ -132,6 +135,26 @@ export default function Sidebar({ open }) {
                     <Settings size={18} color={isActive ? '#9A7B20' : 'var(--text-sub)'} />
                   </span>
                   {open && <span>Admin</span>}
+                </>
+              )}
+            </NavLink>
+
+            {/* Control de usuarios ← NUEVO */}
+            <NavLink
+              to="/control"
+              style={({ isActive }) => ({
+                ...linkStyle(isActive),
+                color:      isActive ? '#1565C0' : 'var(--text-sub)',
+                background: isActive ? '#1565C015' : 'transparent',
+                borderLeft: isActive ? '3px solid #1565C0' : '3px solid transparent',
+              })}
+            >
+              {({ isActive }) => (
+                <>
+                  <span style={{ flexShrink: 0, display: 'flex' }}>
+                    <UserCog size={18} color={isActive ? '#1565C0' : 'var(--text-sub)'} />
+                  </span>
+                  {open && <span>Control</span>}
                 </>
               )}
             </NavLink>
