@@ -1,0 +1,14 @@
+# Archivos sensibles
+.env
+
+# Dependencias
+node_modules/
+__pycache__/
+*.pyc
+
+# Build de React
+liga-futbol/dist/
+liga-futbol/.env.local
+
+# Logs
+*.log

@@ -1,0 +1,7 @@
+# Variables de entorno — Liga Polotitlán
+# NO subas este archivo a GitHub (está en .gitignore)
+
+DB_HOST=db-server
+DB_USER=root
+DB_PASS=ligapass2026
+DB_NAME=liga_polotitlan
